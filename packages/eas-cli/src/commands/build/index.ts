@@ -127,7 +127,6 @@ export default class Build extends EasCommand {
     ...this.ContextOptions.ProjectConfig,
     ...this.ContextOptions.Analytics,
     ...this.ContextOptions.Vcs,
-    ...this.ContextOptions.SessionManagment,
   };
 
   async runAsync(): Promise<void> {
@@ -144,7 +143,6 @@ export default class Build extends EasCommand {
       projectDir,
       analytics,
       vcsClient,
-      sessionManager,
     } = await this.getContextAsync(Build, {
       nonInteractive: flags.nonInteractive,
     });
@@ -169,8 +167,7 @@ export default class Build extends EasCommand {
       projectDir,
       flagsWithPlatform,
       actor,
-      getDynamicPrivateProjectConfigAsync,
-      sessionManager
+      getDynamicPrivateProjectConfigAsync
     );
   }
 
