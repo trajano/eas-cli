@@ -7,6 +7,7 @@ import {
   EnvironmentVariableEnvironment,
   EnvironmentVariableFragment,
   EnvironmentVariablesByAppIdQuery,
+  EnvironmentVariablesSharedQuery,
 } from '../generated';
 import { EnvironmentVariableFragmentNode } from '../types/EnvironmentVariable';
 
@@ -101,7 +102,7 @@ export const EnvironmentVariablesQuery = {
   ): Promise<EnvironmentVariableFragment[]> {
     const data = await withErrorHandlingAsync(
       graphqlClient
-        .query<EnvironmentVariablesByAppIdQuery>(
+        .query<EnvironmentVariablesSharedQuery>(
           gql`
             query EnvironmentVariablesShared($appId: String!, $filterNames: [String!]) {
               app {

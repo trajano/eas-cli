@@ -8,6 +8,7 @@ import {
   CreateEnvironmentVariableForAppMutation,
   DeleteEnvironmentVariableMutation,
   EnvironmentVariableFragment,
+  EnvironmentVariableType,
   EnvironmentVariableVisibility,
   LinkSharedEnvironmentVariableMutation,
   UnlinkSharedEnvironmentVariableMutation,
@@ -108,6 +109,7 @@ export const EnvironmentVariableMutation = {
           value: string;
           visibility: EnvironmentVariableVisibility;
           overwrite?: boolean;
+          type: EnvironmentVariableType;
         }
       | UpdateVariableArgs,
     accountId: string
@@ -148,6 +150,7 @@ export const EnvironmentVariableMutation = {
           environment: string;
           visibility: EnvironmentVariableVisibility;
           overwrite?: boolean;
+          type: EnvironmentVariableType;
         }
       | (UpdateVariableArgs & { environment: string }),
     appId: string

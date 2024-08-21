@@ -2802,7 +2802,6 @@ export type BuildMetadataInput = {
   customWorkflowName?: InputMaybe<Scalars['String']['input']>;
   developmentClient?: InputMaybe<Scalars['Boolean']['input']>;
   distribution?: InputMaybe<DistributionType>;
-  environment?: InputMaybe<Scalars['String']['input']>;
   fingerprintSource?: InputMaybe<FingerprintSourceInput>;
   gitCommitHash?: InputMaybe<Scalars['String']['input']>;
   gitCommitMessage?: InputMaybe<Scalars['String']['input']>;
@@ -3194,6 +3193,7 @@ export type CreateEnvironmentVariableInput = {
   environment: EnvironmentVariableEnvironment;
   name: Scalars['String']['input'];
   overwrite?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<EnvironmentVariableType>;
   value: Scalars['String']['input'];
   visibility: EnvironmentVariableVisibility;
 };
@@ -3256,6 +3256,7 @@ export type CreateServerlessFunctionUploadUrlResult = {
 export type CreateSharedEnvironmentVariableInput = {
   name: Scalars['String']['input'];
   overwrite?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<EnvironmentVariableType>;
   value: Scalars['String']['input'];
   visibility: EnvironmentVariableVisibility;
 };
@@ -3811,6 +3812,11 @@ export type EnvironmentVariableMutationUnlinkSharedEnvironmentVariableArgs = {
 export enum EnvironmentVariableScope {
   Project = 'PROJECT',
   Shared = 'SHARED'
+}
+
+export enum EnvironmentVariableType {
+  File = 'FILE',
+  String = 'STRING'
 }
 
 export enum EnvironmentVariableVisibility {

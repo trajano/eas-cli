@@ -1,5 +1,8 @@
 import { Flags } from '@oclif/core';
+import assert from 'assert';
 import chalk from 'chalk';
+import fs from 'fs-extra';
+import path from 'path';
 
 import EasCommand from '../../commandUtils/EasCommand';
 import {
@@ -11,6 +14,7 @@ import {
 import {
   EnvironmentVariableEnvironment,
   EnvironmentVariableScope,
+  EnvironmentVariableType,
   EnvironmentVariableVisibility,
 } from '../../graphql/generated';
 import { EnvironmentVariableMutation } from '../../graphql/mutations/EnvironmentVariableMutation';
@@ -32,6 +36,7 @@ type CreateFlags = {
   value?: string;
   link?: boolean;
   force?: boolean;
+  type?: EnvironmentVariableType;
   visibility?: EnvironmentVariableVisibility;
   scope?: EnvironmentVariableScope;
   environment?: EnvironmentVariableEnvironment;
@@ -58,6 +63,11 @@ export default class EnvironmentVariableCreate extends EasCommand {
       description: 'Overwrite existing variable',
       default: false,
     }),
+    type: Flags.enum({
+      description: 'The type of variable',
+      options: [EnvironmentVariableType.String, EnvironmentVariableType.File],
+      default: EnvironmentVariableType.String,
+    }),
     ...EASVariableVisibilityFlag,
     ...EASVariableScopeFlag,
     ...EASEnvironmentFlag,
@@ -82,6 +92,7 @@ export default class EnvironmentVariableCreate extends EasCommand {
       visibility,
       link,
       force,
+      type,
     } = this.validateFlags(flags);
 
     const {
@@ -108,6 +119,15 @@ export default class EnvironmentVariableCreate extends EasCommand {
         nonInteractive,
         hidden: visibility !== EnvironmentVariableVisibility.Public,
       });
+    }
+
+    let environmentFilePath: string | undefined;
+    if (type === EnvironmentVariableType.File) {
+      environmentFilePath = path.resolve(value);
+      if (!(await fs.pathExists(environmentFilePath))) {
+        throw new Error(`File "${value}" does not exist`);
+      }
+      value = await fs.readFile(environmentFilePath, 'base64');
     }
 
     if (scope === EnvironmentVariableScope.Project) {
@@ -178,6 +198,7 @@ export default class EnvironmentVariableCreate extends EasCommand {
           environment,
           visibility,
           overwrite,
+          type,
         },
         projectId
       );
@@ -221,6 +242,7 @@ export default class EnvironmentVariableCreate extends EasCommand {
           name,
           value,
           visibility,
+          type,
         },
         ownerAccount.id
       );
@@ -254,12 +276,13 @@ export default class EnvironmentVariableCreate extends EasCommand {
     }
   }
 
-  private validateFlags(flags: CreateFlags): CreateFlags {
+  private validateFlags(flags: CreateFlags): CreateFlags & { type: EnvironmentVariableType } {
     if (flags.scope !== EnvironmentVariableScope.Shared && flags.link) {
       throw new Error(
         `Unexpected argument: --link can only be used when creating  shared variables`
       );
     }
+    assert(flags.type, 'type is required');
     if (
       flags.scope === EnvironmentVariableScope.Shared &&
       flags.environment &&
@@ -270,6 +293,6 @@ export default class EnvironmentVariableCreate extends EasCommand {
         'Unexpected argument: --environment in non-interactive mode can only be used with --link flag.'
       );
     }
-    return flags;
+    return { ...flags, type: flags.type };
   }
 }
