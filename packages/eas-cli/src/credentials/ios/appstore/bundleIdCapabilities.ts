@@ -11,6 +11,7 @@ import {
 } from '@expo/apple-utils';
 import { JSONObject, JSONValue } from '@expo/json-file';
 import getenv from 'getenv';
+import Joi from 'joi';
 import { inspect } from 'util';
 
 import Log from '../../../log';
@@ -52,6 +53,10 @@ const createValidateStringArrayOptions =
   };
 
 const validateDevProdString = createValidateStringOptions(['development', 'production']);
+
+const validateStringOptions = (options: any): boolean => {
+  return typeof options === 'string';
+};
 
 const getBooleanOptions: GetOptionsMethod = entitlement => {
   return entitlement === true ? CapabilityTypeOption.ON : CapabilityTypeOption.OFF;
@@ -263,6 +268,27 @@ type CapabilityClassifier = {
   capabilityIdPrefix?: string;
   options?: undefined;
 };
+
+const ReadIdOnIPhoneOptionsSchema = Joi.object({
+  'document-elements': Joi.array()
+    .items(
+      Joi.string().valid(
+        'given-name',
+        'family-name',
+        'portrait',
+        'address',
+        'issuing-authority',
+        'document-issue-date',
+        'document-expiration-date',
+        'document-number',
+        'driving-privileges',
+        'age',
+        'date-of-birth'
+      )
+    )
+    .required(),
+  'document-types': Joi.array().items(Joi.string().valid('drivers-license')).required(),
+});
 
 // NOTE(Bacon): From manually toggling values in Xcode and checking the git diff and network requests.
 // Last Updated: July 22nd, 2021
@@ -747,7 +773,169 @@ export const CapabilityMapping: CapabilityClassifier[] = [
     validateOptions: validateBooleanOptions,
     getOptions: getBooleanOptions,
   },
-
+  {
+    entitlement: 'com.apple.developer.journal.allow',
+    name: 'Present the journaling suggestions picker',
+    capability: CapabilityType.JOURNAL_ALLOW,
+    validateOptions: createValidateStringArrayOptions(['suggestions']),
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.marketplace.app-installation',
+    name: 'Vend other iOS apps as an alternative app marketplace',
+    capability: CapabilityType.ALTERNATIVE_MARKETPLACES,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.managed-app-distribution.install-ui',
+    name: 'Use Managed App Distribution',
+    capability: CapabilityType.MANAGED_APP_DISTRIBUTION_INSTALL_UI,
+    validateOptions: createValidateStringArrayOptions(['managed-app']),
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.networking.slicing.appcategory',
+    name: 'Enable Cellular Network Slicing by app category',
+    capability: CapabilityType.NETWORK_SLICING_APP_CATEGORY,
+    validateOptions: createValidateStringArrayOptions([
+      'gaming-6014',
+      'communication-9000',
+      'streaming-9001',
+    ]),
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.networking.slicing.trafficcategory',
+    name: 'Enable Cellular Network Slicing by traffic category',
+    capability: CapabilityType.NETWORK_SLICING_TRAFFIC_CATEGORY,
+    validateOptions: createValidateStringArrayOptions([
+      'defaultslice-1',
+      'video-2',
+      'background-3',
+      'voice-4',
+      'callsignaling-5',
+      'responsivedata-6',
+      'avstreaming-7',
+      'responsiveav-8',
+    ]),
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.storekit.external-link.account',
+    name: 'Link to an external website for account creation or management',
+    capability: CapabilityType.STOREKIT_EXTERNAL_LINK_ACCOUNT,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.storekit.external-purchase',
+    name: 'Offer external purchases',
+    capability: CapabilityType.STOREKIT_EXTERNAL_PURCHASE,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.storekit.external-purchase-link',
+    name: 'Link to an external website for purchase',
+    capability: CapabilityType.STOREKIT_EXTERNAL_PURCHASE_LINK,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.browser.app-installation',
+    name: 'Enable a browser to install an alternative marketplace app from a website',
+    capability: CapabilityType.BROWSER_APP_INSTALLATION,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.nfc.hce',
+    name: 'Use the card session API',
+    capability: CapabilityType.NFC_HCE,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.nfc.hce.iso7816.select-identifier-prefixes',
+    name: 'Identifier strings the app handles with the card session API',
+    capability: CapabilityType.NFC_HCE_SELECT_IDENTIFIER_PREFIXES,
+    validateOptions: validateStringArrayOptions,
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.nfc.hce.default-contactless-app',
+    name: 'Be a default app for contactless NFC with the card session API',
+    capability: CapabilityType.NFC_HCE_DEFAULT_CONTACTLESS_APP,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.embedded-web-browser-engine',
+    name: 'Use the embedded web browser engine',
+    capability: CapabilityType.EMBEDED_WEB_BROWSER_ENGINE,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.memory.transfer_accept',
+    name: 'Accept memory transfers',
+    capability: CapabilityType.MEMORY_TRANSFER_ACCEPT,
+    validateOptions: validateStringOptions,
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.memory.transfer_send',
+    name: 'Send memory transfers',
+    capability: CapabilityType.MEMORY_TRANSFER_SEND,
+    validateOptions: validateStringOptions,
+    getOptions: getDefinedOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.web-browser-engine.host',
+    name: 'Host a web browser engine',
+    capability: CapabilityType.WEB_BROWSER_ENGINE_HOST,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.web-browser-engine.networking',
+    name: 'Use networking with a web browser engine',
+    capability: CapabilityType.WEB_BROWSER_ENGINE_NETWORKING,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.web-browser-engine.rendering',
+    name: 'Render with a web browser engine',
+    capability: CapabilityType.WEB_BROWSER_ENGINE_RENDERING,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.web-browser-engine.webcontent',
+    name: 'Access web content with a web browser engine',
+    capability: CapabilityType.WEB_BROWSER_ENGINE_WEBCONTENT,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.persistent-content-capture',
+    name: 'Persistent Content Capture',
+    capability: CapabilityType.PERSISTENT_CONTENT_CAPTURE,
+    validateOptions: validateBooleanOptions,
+    getOptions: getBooleanOptions,
+  },
+  {
+    entitlement: 'com.apple.developer.proximity-reader.identity.read',
+    name: 'Read ID on iPhone',
+    capability: CapabilityType.PROXIMITY_READER_IDENTITY_READ,
+    validateOptions: (options: any): boolean => {
+      const { error } = ReadIdOnIPhoneOptionsSchema.validate(options);
+      return !error;
+    },
+    getOptions: getDefinedOptions,
+  },
   // VMNET
 
   // These don't appear to have entitlements, so it's unclear how we can automatically enable / disable them at this time.
